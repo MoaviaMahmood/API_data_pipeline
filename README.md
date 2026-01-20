@@ -22,7 +22,7 @@ This project is suitable for:
 
 ---
 
-## 📊 Charts & Visualizations
+## Charts & Visualizations
 
 The project includes basic data visualizations to better understand the extracted data.
 
