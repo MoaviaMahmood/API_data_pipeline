@@ -6,7 +6,7 @@ This project demonstrates **real-world data engineering practices** including AP
 
 ---
 
-## 🚀 Project Overview
+## Project Overview
 
 The pipeline performs the following steps:
 
@@ -19,22 +19,86 @@ The entire workflow runs inside Docker containers, ensuring **reproducibility** 
 
 ---
 
-## 🧱 Architecture Overview
+## Architecture Overview
 
 ### Data Flow
 
-```
-API
-        │
-        ▼
-ETL Container (Python)
-  - Extract (requests)
-  - Transform (pandas)
-  - Load (SQLAlchemy)
-        │
-        ▼
-PostgreSQL Container
-```
+                        ┌──────────────────────────────┐
+                        │        Docker Compose         │
+                        │   (Service Orchestration)     │
+                        │                              │
+                        │  • Manages ETL & Postgres     │
+                        │  • Shared Docker network      │
+                        │  • Env variables injection   │
+                        └──────────────┬───────────────┘
+                                       │
+              ┌────────────────────────▼────────────────────────┐
+              │                ETL Container (Python)            │
+              │                                                  │
+              │  ┌───────────────┐                               │
+              │  │   EXTRACT     │                               │
+              │  │               │                               │
+              │  │ Rick & Morty  │                               │
+              │  │ REST API      │                               │
+              │  │               │                               │
+              │  │ /character    │                               │
+              │  │ /location     │                               │
+              │  │ /episode      │                               │
+              │  │               │                               │
+              │  │ HTTP GET      │                               │
+              │  │ Pagination    │                               │
+              │  │ JSON parsing  │                               │
+              │  └───────┬───────┘                               │
+              │          │                                       │
+              │          ▼                                       │
+              │   raw_data/                                      │
+              │   • raw_data_characters.json                     │
+              │   • raw_data_episodes.json                       │
+              │   • raw_data_locations.json                      │
+              │                                                  │
+              │  ┌───────────────┐                               │
+              │  │  TRANSFORM    │                               │
+              │  │   (Pandas)    │                               │
+              │  │               │                               │
+              │  │ Field select  │                               │
+              │  │ Normalization │                               │
+              │  │ Lowercasing   │                               │
+              │  │ Type cleanup  │                               │
+              │  └───────┬───────┘                               │
+              │          │                                       │
+              │          ▼                                       │
+              │   useful_data/                                   │
+              │   • characters.csv                               │
+              │   • episodes.csv                                 │
+              │   • locations.csv                                │
+              │                                                  │
+              │  ┌───────────────┐                               │
+              │  │     LOAD      │                               │
+              │  │               │                               │
+              │  │ SQLAlchemy    │                               │
+              │  │ to_sql()      │                               │
+              │  │ Append-safe   │                               │
+              │  └───────┬───────┘                               │
+              └──────────┼──────────────────────────────────────┘
+                         │
+                         ▼
+        ┌────────────────────────────────────────────────────┐
+        │             PostgreSQL Container                   │
+        │                                                    │
+        │  Database: rick_morty                              │
+        │  Schema: public                                    │
+        │                                                    │
+        │  Tables:                                           │
+        │  • characters                                      │
+        │  • episodes                                        │
+        │  • locations                                       │
+        │                                                    │
+        │  Validation:                                       │
+        │  • SELECT queries                                  │
+        │  • Row count checks                                │
+        │  • Data integrity                                  │
+        └────────────────────────────────────────────────────┘
+
 
 ### Architecture Description
 
@@ -51,7 +115,7 @@ The ETL container runs as a **batch job** and exits after successful execution, 
 
 ---
 
-## 🐳 Tech Stack
+## Tech Stack
 
 * **Python 3.11**
 * **Pandas** – data transformation
@@ -62,7 +126,7 @@ The ETL container runs as a **batch job** and exits after successful execution, 
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```md
 API_data_pipeline/
@@ -83,7 +147,7 @@ API_data_pipeline/
 
 ---
 
-## ⚙️ Environment Variables
+## nvironment Variables
 
 The project uses environment variables for secure configuration:
 
@@ -98,16 +162,16 @@ These are injected into the ETL container at runtime via Docker Compose.
 
 ---
 
-## ▶️ How to Run the Project
+## How to Run the Project
 
-### 1️⃣ Clone the Repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/rick-morty-etl.git
 cd rick-morty-etl
 ```
 
-### 2️⃣ Start the Pipeline
+### Start the Pipeline
 
 ```bash
 docker-compose up --build
@@ -121,7 +185,7 @@ This will:
 
 ---
 
-## 🗄️ Database Verification
+## Database Verification
 
 Access PostgreSQL:
 
@@ -138,7 +202,7 @@ SELECT COUNT(*) FROM characters;
 
 ---
 
-## 📊 Output
+## Output
 
 * PostgreSQL tables:
 
@@ -151,7 +215,7 @@ SELECT COUNT(*) FROM characters;
 
 ---
 
-## 🧠 Key Data Engineering Concepts Demonstrated
+## Key Data Engineering Concepts Demonstrated
 
 * API-based data ingestion
 * Pagination handling
@@ -163,7 +227,7 @@ SELECT COUNT(*) FROM characters;
 
 ---
 
-## 🔮 Future Improvements
+## Future Improvements
 
 * Add **Airflow** for orchestration
 * Add **logging & retries** for failed API pages
@@ -173,7 +237,7 @@ SELECT COUNT(*) FROM characters;
 
 ---
 
-## 👤 Author
+## Author
 
 **Moavia Mahmood**
 Data Engineer
